@@ -20,7 +20,16 @@ async_session_factory = async_sessionmaker(bind=async_engine)
 if not os.path.exists('logs'):
     os.mkdir('logs')
 
-file_handler = RotatingFileHandler('logs/panel.log', maxBytes=60240,
+
+log = logging.getLogger()
+
+file_handler = RotatingFileHandler('logs/bot.log', maxBytes=60240,
                                     backupCount=10)
+file_handler.setFormatter(logging.Formatter(
+    '%(asctime)s [%(levelname)s] [%(module)s]:\n   [MESSAGE]: %(message)s \n      [DIRECTORY]: [%(pathname)s:%(lineno)d] \n         [FUNC]: [%(funcName)s]\n'))
+file_handler.setLevel(logging.INFO)
+
+log.addHandler(file_handler)
+log.info('Bot startup')
 
 from bot import routes, models, errors, alembic_setup
