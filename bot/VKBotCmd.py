@@ -16,7 +16,17 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent, VkBotEventType
 from vk_api.utils import get_random_id
 import threading
 from threading import Thread
-from config import config
+from bot.VKBot import Bot
+
+test = Bot()
+
+@test.command('-r', prefixes=['-'], required_prefixes='Test')
+# @setupmethod
+def test_func():
+    print('test_func')
+    ...
+
+
 
 # print('Запуск скрипта...')
 # vk_session = vk_api.VkApi(token=config['VK_TOKEN'])

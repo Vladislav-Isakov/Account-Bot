@@ -20,7 +20,6 @@ async_session_factory = async_sessionmaker(bind=async_engine)
 if not os.path.exists('logs'):
     os.mkdir('logs')
 
-
 log = logging.getLogger()
 
 file_handler = RotatingFileHandler('logs/bot.log', maxBytes=60240,
@@ -32,4 +31,4 @@ file_handler.setLevel(logging.INFO)
 log.addHandler(file_handler)
 log.info('Bot startup')
 
-from bot import routes, models, errors, alembic_setup
+from bot import VKBotCmd, models, errors, alembic_setup, requests_classes

@@ -6,3 +6,4 @@ requests==2.31.0
 vk_api==11.9.9
 werkzeug==3.0.1
 psycopg2-binary==2.9.9
+aiohttp==3.9.1
