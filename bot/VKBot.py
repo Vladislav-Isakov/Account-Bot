@@ -2,9 +2,13 @@ from functools import update_wrapper
 from typing import (
     Any,
     Callable,
+    Dict,
+    Set,
     TypeVar,
+    Union,
     cast
 )
+from bot.types import InputTemplateType
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -27,6 +31,7 @@ class Scaffold:
     def __init__(self) -> None:
         self.view_functions: dict[str, Callable] = {} # функции - представления, ассоциация с названиями функций, для будущих вызовов
         self.reg_command_functions: dict[str, Callable] = {} # зарегистрированные функции команд
+        self.command_types = InputTemplateType()
 
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.name!r}>"
@@ -38,7 +43,7 @@ class Scaffold:
         options: dict,
     ) -> Callable:
         if "prefixes" in options:
-            raise TypeError("Используйте декоратор 'command' чтобы использовать аргумент 'prefixes'")
+            raise TypeError("Используйте декоратор 'command' чтобы использовать несколько аргументов в параметре 'prefixes'")
         
         return self.command(command, prefixes=[method], **options)
     
@@ -119,9 +124,27 @@ class Scaffold:
         """
         raise NotImplementedError
 
-    def add(self) -> None:
+    def reg_command_func(
+            self, 
+            command: str,
+            patterns: Dict[str, Union[str, int, None]], 
+            prefixes: Set[str], 
+            **options: Any,
+        ) -> None:
+        # {есть префикс или нет True/False: { 
+        #     префикс команды : {
+        #             засчитывать заглавное написание или нет : {
+        #                 кол-во слов/шаблонов в команде : {
+        #                     первое слово в команде : {
+
+        #                     }
+        #                 }
+        #             }
+        #         }
+        #     }
+        # }
         ...
-    
+
 class Bot(Scaffold):
 
     def __init__(self) -> None:
@@ -132,10 +155,14 @@ class Bot(Scaffold):
         self,
         command: str,
         endpoint: str | None = None,
-        command_func: Callable | None = None,
+        command_func: Callable = None,
         **options: Any,
     ) -> None:
-        print(endpoint)
+        if not command_func:
+            raise TypeError(f"Обязательный параметр {command_func!r} не был передан")
+
+        patterns = self.command_types.parse_patterns_command(command)
+
         if endpoint is None:
             endpoint = _name_from_func(command_func)
 
@@ -146,22 +173,23 @@ class Bot(Scaffold):
         # используются префиксы из объекта command_func. Если ни того, ни другого не существует, 
         #будет кортеж только из ``/`` по умолчанию.
         if prefixes is None:
-            prefixes = getattr(command_func, "prefixes", None) or ("/",)
+            prefixes = getattr(command_func, "prefixes", None)
         if isinstance(prefixes, str):
             raise TypeError(
                 "Разрешенные префиксы должны представлять собой список строк, например"
                 ' example: @bot.command(..., prefixes=["/"])'
             )
-        prefixes = {item.upper() for item in prefixes}
+        
+        prefixes = {item for item in prefixes}
 
         # Префиксы, которые всегда следует добавлять
         required_prefixes = set(getattr(command_func, "required_prefixes", ()))
 
         # Добавление обязательных префиксов по умолчанию.
         prefixes |= required_prefixes
-        # command = self.(command, prefixes=prefixes, **options)
 
-        # self.add(command)
+        self.reg_command_func(command, prefixes=prefixes, patterns=patterns, **options)
+
         if command_func is not None:
 
             old_func = self.view_functions.get(endpoint)

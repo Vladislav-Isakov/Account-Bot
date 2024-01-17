@@ -20,10 +20,8 @@ from bot.VKBot import Bot
 
 test = Bot()
 
-@test.command('-r', prefixes=['-'], required_prefixes='Test')
-# @setupmethod
-def test_func():
-    print('test_func')
+@test.command('<test:command>  <int(len=10):name>', prefixes=['-'])
+def test_func(hello):
     ...
 
 
