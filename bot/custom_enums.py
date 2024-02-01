@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum import IntEnum, Enum
 
 class VkLongpollMode(IntEnum):
     """
@@ -17,3 +17,12 @@ class VkLongpollMode(IntEnum):
     # возвращать поле random_id 
     # (random_id может быть передан при отправке сообщения методом https://dev.vk.com/ru/method/messages.send).
     RETURN_THE_RANDOM_ID_FIELD = 128
+
+class VKTypeLongpoll(Enum):
+    """
+    Тип longpoll событий, который будет получать система.
+    User Long Poll API: (https://dev.vk.com/ru/api/user-long-poll/getting-started)
+    Bots Long Poll API: (https://dev.vk.com/ru/api/bots-long-poll/getting-started)
+    """
+    USER = 'user'
+    GROUP = 'group'
