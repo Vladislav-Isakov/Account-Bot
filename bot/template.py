@@ -2,12 +2,12 @@ import ast
 import re
 from typing import (
     Any, 
-    Dict, 
-    Iterable,
-    List, 
+    Dict,
+    List,
     Tuple,
     Union,
-    )
+)
+from bot.custom_types import CommandData
 
 
 class InputTemplateType:
@@ -19,7 +19,7 @@ class InputTemplateType:
         :param self.type_variable_params: доступные параметры для использования в типах данных. \n         Если типа нет, значит он не поддерживает использование параметров и будет выдана ошибка.
         """
         self._PYTHON_CONSTANTS = {"None": None, "True": True, "False": False}
-        self.type_variable: Tuple[str] = ('int', 'str', 'float', 'uuid', 'regex')
+        self.type_variable: Tuple[str, str, str, str, str] = ('int', 'str', 'float', 'uuid', 'regex')
         self.type_variable_regex: Dict[str, str] = {'int': '\d+', 
                                                     'str': '.*', 
                                                     'float': '\d+.\d+', 
@@ -130,12 +130,12 @@ class InputTemplateType:
 
         return tuple(args), kwargs
 
-    def parse_patterns_command(self, bot_command: str) -> Iterable:
+    def parse_patterns_command(self, bot_command: str) -> CommandData:
         """
         Приставка к переменным t_ - говорит о том, что эта переменная относится к текущему шаблону в итерации.
         """
 
-        command_data: Dict[str, Union[None, str, int]]= {
+        command_data: CommandData = {
             "command": None, # название команды - всё что идёт до шаблона <>
             "template": None, # конечный вид команды, после замены на регулярные выражения
             "count_templates": 0 # кол-во шаблонов находящихся в команде
@@ -193,7 +193,7 @@ class InputTemplateType:
                         
                         for arg in t_kwargs:
                             if arg not in type_arguments:
-                                raise ValueError(f'Тип переменной: {data["type"]!r} не поддерживает аргумент: {arg!r}. \n Поддерживаемые аргументы: {type_arguments!r}')
+                                raise ValueError(f'Тип переменной: {data["type"]!r} не поддерживает аргумент: {arg!r}. \n Поддерживаемые аргументы: {type_arguments!r}.')
                             
                             # Связка: название аргумента использованого в типе и его значение, пример:
                             # Шаблон в команде <int(len=10):name>, связка будет: len=10
@@ -216,14 +216,13 @@ class InputTemplateType:
                                 replace_template
                              )
                             )
-        data = self._changing_templates(bot_command, replacement_templates)
-
-        if data:
-            command_data['template'] = data
+        command_template = self._changing_templates(bot_command, replacement_templates)
+        if command_template:
+            command_data['template'] = command_template
 
         return command_data
     
-    def _changing_templates(self, bot_command: str, substitution: List[Tuple[str, str]]):
+    def _changing_templates(self, bot_command: str, substitution: List[Tuple[str, str]]) -> str:
         """
         Заменяет структуру шаблонов, на регулярные выражения. 
         С помощью регулярок будет поиск  подходящей по шаблону команды с сообщением пользователя.

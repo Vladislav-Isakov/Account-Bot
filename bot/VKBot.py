@@ -3,12 +3,14 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Optional,
     Set,
     TypeVar,
     Union,
     cast
 )
-from bot.types import InputTemplateType
+from bot.template import InputTemplateType
+from bot.custom_types import CommandData
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -27,6 +29,8 @@ def _name_from_func(command_func: Callable) -> str:
     return command_func.__name__
 
 class Scaffold:
+
+    name: str
 
     def __init__(self) -> None:
         self.view_functions: dict[str, Callable] = {} # функции - представления, ассоциация с названиями функций, для будущих вызовов
@@ -87,7 +91,7 @@ class Scaffold:
         self,
         command: str,
         endpoint: str | None = None,
-        command_func: Callable | None = None,
+        command_func: Optional[Callable] = None,
         **options: Any,
     ) -> None:
         """Зарегистрируйте команду для последующей маршрутизации при обработке событий
@@ -127,7 +131,7 @@ class Scaffold:
     def reg_command_func(
             self, 
             command: str,
-            patterns: Dict[str, Union[str, int, None]], 
+            patterns: CommandData, 
             prefixes: Set[str], 
             **options: Any,
         ) -> None:
@@ -155,13 +159,13 @@ class Bot(Scaffold):
         self,
         command: str,
         endpoint: str | None = None,
-        command_func: Callable = None,
+        command_func: Optional[Callable] = None,
         **options: Any,
     ) -> None:
         if not command_func:
             raise TypeError(f"Обязательный параметр {command_func!r} не был передан")
 
-        patterns = self.command_types.parse_patterns_command(command)
+        patterns: CommandData = self.command_types.parse_patterns_command(command)
 
         if endpoint is None:
             endpoint = _name_from_func(command_func)
