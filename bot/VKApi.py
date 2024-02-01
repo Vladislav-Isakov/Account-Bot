@@ -79,7 +79,11 @@ class VkApiMethods:
         self._method = method
 
     def __getattr__(self, method):
-               
+        
+        if '_' in method:
+            m = method.split('_')
+            method = m[0] + ''.join(i.title() for i in m[1:])
+            
         return VkApiMethods(
             self._api,
             (self._method + '.' if self._method else '') + method
