@@ -1,24 +1,13 @@
-import requests
-import json
 import ast
-import time
 import os
-import secrets
-from requests.exceptions import Timeout
-from datetime import datetime
-from sqlalchemy import desc
 from pprint import pprint as print
-from bot.models import Users
-# from app.functions import
-# from app.сlasses import
-import vk_api
-from vk_api.bot_longpoll import VkBotLongPoll, VkBotEvent, VkBotEventType
-from vk_api.utils import get_random_id
-import threading
-from threading import Thread
 from bot.VKBot import Bot
+from bot.VKApi import VKApi
+from config import config
 
-test = Bot()
+vk_api_session = VKApi(token=config['VK_API_TOKEN'])
+
+test = Bot(base_vk_api=vk_api_session, type_longpoll='User')
 
 @test.command('<test:command>  <int(len=10):name>', prefixes=['-'])
 def test_func(hello):
@@ -44,33 +33,3 @@ def test_func(hello):
 #                     )
 #         except KeyboardInterrupt:
 #             pass
-
-# class ThreadWithReturnValue(Thread):
-    
-#     def __init__(self, group=None, target=None, name=None,
-#                  args=(), kwargs={}, Verbose=None):
-#         Thread.__init__(self, group, target, name, args, kwargs)
-#         self._return = None
-#         self._stop_event = threading.Event()
-#         self.daemon = True
-#         self.start()
-
-#     def stop(self):
-#         self._stop_event.set()
-
-#     def stopped(self):
-#         return self._stop_event.is_set()
-    
-#     def run(self):
-#         if self._target is not None:
-#             self._return = self._target(*self._args,
-#                                                 **self._kwargs)
-#     def join(self, *args):
-#         Thread.join(self, *args)
-#         return self._return
-
-# Thread_1 = ThreadWithReturnValue(target=api, name='bot_longpoll')
-# print(Thread_1.isDaemon)
-# print(Thread_1.is_alive())
-# print(Thread_1.ident)
-# print('Скрипт запущен.')

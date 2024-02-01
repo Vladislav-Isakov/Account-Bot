@@ -11,6 +11,7 @@ from typing import (
 )
 from bot.template import InputTemplateType
 from bot.custom_types import CommandData
+from bot.VKApi import VKApi
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -151,8 +152,12 @@ class Scaffold:
 
 class Bot(Scaffold):
 
-    def __init__(self) -> None:
+    def __init__(self, *, base_vk_api: Optional[VKApi] = None, type_longpoll: str = 'User', group_id: Optional[int] = None) -> None:
         super().__init__()
+        self.api = base_vk_api
+        self.type_longpoll = type_longpoll
+        self.group_id = group_id
+
         
     @setupmethod
     def add_command(
@@ -204,3 +209,6 @@ class Bot(Scaffold):
                     f" командная функция: {endpoint}"
                 )
             self.view_functions[endpoint] = command_func
+    
+    def run(self):
+        pass

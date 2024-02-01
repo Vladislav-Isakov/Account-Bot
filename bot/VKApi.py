@@ -1,23 +1,14 @@
 import asyncio
 from copy import deepcopy
-from typing import Any, Dict, Optional, Union
-
-import aiohttp
+from typing import Any, Dict, Optional
 from bot.requests_classes import AioLoop, AioRequests
 from bot.exceptions import ApiError
 from functools import wraps
 
-async def start_async_task(async_func):
-    @wraps(async_func)
-    async def wrapper(*args, **kwargs):
-        loop = AioLoop().get_loop()
-        return loop.run_until_complete(async_func(*args, **kwargs))
-    return wrapper
-
 
 class VKApi:
 
-    def __init__(self, token: Optional[str] = None, api_version: float = 5.103) -> None:
+    def __init__(self, *, token: Optional[str] = None, api_version: float = 5.199) -> None:
         self.token = token
         self.api_version = api_version
         self._aio_http = AioRequests
@@ -29,11 +20,6 @@ class VKApi:
         values = deepcopy(values) if values else {}
         if 'v' not in values:
             values['v'] = self.api_version
-
-        response_2 = await self._aio_http().get(
-            'python://example.com'
-        )
-        print(response_2)
 
         if any((values.get('access_token'), self.token)):
             values['access_token'] = self.token
