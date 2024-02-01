@@ -24,8 +24,6 @@ test = Bot()
 def test_func(hello):
     ...
 
-
-
 # print('Запуск скрипта...')
 # vk_session = vk_api.VkApi(token=config['VK_TOKEN'])
 # bot_longpoll = VkBotLongPoll(vk_session, group_id='206209370', wait=25)
