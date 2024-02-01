@@ -79,7 +79,7 @@ class VkApiMethods:
         self._method = method
 
     def __getattr__(self, method):
-
+               
         return VkApiMethods(
             self._api,
             (self._method + '.' if self._method else '') + method
