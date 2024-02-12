@@ -3,7 +3,6 @@ from copy import deepcopy
 from typing import Any, Dict, Optional
 from bot.requests_classes import AioLoop, AioRequests
 from bot.exceptions import ApiError
-from functools import wraps
 
 
 class VKApi:
@@ -83,6 +82,3 @@ class VkApiMethods:
                 kwargs[key] = ','.join(str(x) for x in value)
 
         return self._api._method(self._method, kwargs)
-
-# vk = VkApiMethods('')
-# vk.wall.get_by_id(posts='...')

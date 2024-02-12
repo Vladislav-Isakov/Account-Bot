@@ -7,11 +7,13 @@ from config import config
 
 vk_api_session = VKApi(token=config['VK_API_TOKEN'])
 
-test = Bot(base_vk_api=vk_api_session, type_longpoll='User')
+test = Bot(base_vk_api=vk_api_session)
 
 @test.command('<test:command>  <int(len=10):name>', prefixes=['-'])
 def test_func(hello):
     ...
+
+test.run()
 
 # print('Запуск скрипта...')
 # vk_session = vk_api.VkApi(token=config['VK_TOKEN'])

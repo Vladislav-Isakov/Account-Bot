@@ -11,6 +11,8 @@ from typing import (
 )
 from bot.template import InputTemplateType
 from bot.custom_types import CommandData
+from bot.custom_enums import VKTypeLongpoll
+from bot.longpoll import VkBotLongPoll, VKUserLongpoll
 from bot.VKApi import VKApi
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -152,11 +154,12 @@ class Scaffold:
 
 class Bot(Scaffold):
 
-    def __init__(self, *, base_vk_api: Optional[VKApi] = None, type_longpoll: str = 'User', group_id: Optional[int] = None) -> None:
+    def __init__(self, *, base_vk_api: Optional[VKApi] = None, type_longpoll: VKTypeLongpoll = VKTypeLongpoll.USER, group_id: Optional[int] = None) -> None:
         super().__init__()
-        self.api = base_vk_api
-        self.type_longpoll = type_longpoll
-        self.group_id = group_id
+        self._api = base_vk_api
+        self._type_longpoll = type_longpoll
+        self._group_id = group_id
+        self._longpoll = VKUserLongpoll(base_vk_api=self._api) if self._type_longpoll == VKTypeLongpoll.USER else VkBotLongPoll()
 
         
     @setupmethod
