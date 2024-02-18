@@ -35,6 +35,7 @@ class VkBotEventType(Enum):
     MESSAGE_NEW = 'message_new'
     MESSAGE_REPLY = 'message_reply'
     MESSAGE_EDIT = 'message_edit'
+    MESSAGE_READ = 'message_read'
     MESSAGE_ALLOW = 'message_allow'
     MESSAGE_DENY = 'message_deny'
     MESSAGE_EVENT = 'message_event'
@@ -100,3 +101,8 @@ class VkBotEventType(Enum):
     DONUT_SUBSCRIPTION_PRICE_CHANGED = 'donut_subscription_price_changed'
     DONUT_MONEY_WITHDRAW = 'donut_money_withdraw'
     DONUT_MONEY_WITHDRAW_ERROR = 'donut_money_withdraw_error'
+
+class VkBotEventContext(Enum):
+    CHAT = 'conversation_event'
+    LS = 'private_messages_event'
+    GROUP = 'group_event'

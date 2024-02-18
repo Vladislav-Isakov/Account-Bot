@@ -4,10 +4,11 @@ from pprint import pprint as print
 from bot.VKBot import Bot
 from bot.VKApi import VKApi
 from config import config
+from bot.custom_enums import VKTypeLongpoll
 
-vk_api_session = VKApi(token=config['VK_API_TOKEN'])
+vk_api_session = VKApi(token=config['VK_API_GROUP_TOKEN'])
 
-test = Bot(base_vk_api=vk_api_session)
+test = Bot(base_vk_api=vk_api_session, type_longpoll=VKTypeLongpoll.GROUP, group_id=206209370)
 
 @test.command('<test:command>  <int(len=10):name>', prefixes=['-'])
 def test_func(hello):

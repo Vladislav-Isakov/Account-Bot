@@ -154,13 +154,12 @@ class Scaffold:
 
 class Bot(Scaffold):
 
-    def __init__(self, *, base_vk_api: Optional[VKApi] = None, type_longpoll: VKTypeLongpoll = VKTypeLongpoll.USER, group_id: Optional[int] = None) -> None:
+    def __init__(self, *, base_vk_api: VKApi, type_longpoll: VKTypeLongpoll = VKTypeLongpoll.USER, group_id: Optional[int] = None) -> None:
         super().__init__()
         self._api = base_vk_api
         self._type_longpoll = type_longpoll
         self._group_id = group_id
-        self._longpoll = VKUserLongpoll(base_vk_api=self._api) if self._type_longpoll == VKTypeLongpoll.USER else VkBotLongPoll()
-
+        self._longpoll = VKUserLongpoll(base_vk_api=self._api) if self._type_longpoll == VKTypeLongpoll.USER else VkBotLongPoll(base_vk_api=self._api, vk_group_id=self._group_id)
         
     @setupmethod
     def add_command(

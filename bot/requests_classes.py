@@ -1,7 +1,7 @@
 import asyncio
 from traceback import TracebackException
 from types import TracebackType
-from aiohttp import ClientResponse, ClientSession, JsonPayload, ClientTimeout, client_exceptions
+from aiohttp import ClientSession, ClientTimeout
 from typing import (
     Any,
     Dict,
@@ -60,18 +60,18 @@ class AioRequests:
         self._session_timeout: ClientTimeout = ClientTimeout(total=session_timeout)
         self._session: AioSession = AioSession()
 
-    async def get(self, url: str):
+    async def get(self, url: str, params: Any):
         async with self._session as session:
-            async with session.get(url, timeout=self._session_timeout) as response:
+            async with session.get(url, timeout=self._session_timeout, params=params, ssl=False) as response:
                 return await response.json()
     
     async def post(
         self, 
         url: str, 
-        data: Optional[str] = None, 
-        json: Optional[JsonPayload] = None, 
+        data: Optional[Dict[str, Any]] = None, 
+        json: Optional[Dict[str, Any]] = None, 
         headers: Optional[Dict[str, Any]] = None,
-    ) -> ClientResponse.json:
+    ) -> Dict[str, Any]:
         async with self._session as session:
-            async with session.post(url, data=data, json=json, headers=headers, timeout=self._session_timeout) as response:
+            async with session.post(url, data=data, json=json, headers=headers, timeout=self._session_timeout, ssl=False) as response:
                 return await response.json()

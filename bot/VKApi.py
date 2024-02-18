@@ -17,6 +17,7 @@ class VKApi:
     async def _method(self, method: str, values: Dict[str, Any]):
         
         values = deepcopy(values) if values else {}
+
         if 'v' not in values:
             values['v'] = self.api_version
 
@@ -24,9 +25,10 @@ class VKApi:
             values['access_token'] = self.token
         else:
             raise ValueError(f'Отсутствует токен доступа для обращения к API VK.')
-    
-        response = await self._aio_http().get(
-            'https://api.vk.com/method/' + method
+
+        response = await self._aio_http().post(
+            'https://api.vk.com/method/' + method,
+            data=values
         )
 
         if response.get('error', None) is not None:
