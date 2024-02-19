@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Literal, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 
 class VkEventActionObject(Enum):
@@ -28,6 +28,13 @@ class VkTypeButton(Enum):
     CALLBACK = 'callback'
     INTENT_SUBSCRIBE = 'intent_subscribe'
     INTENT_UNSUBSCRIBE = 'intent_unsubscribe'
+
+class VkKeyboardButtonColor(Enum):
+    DEFAULT = 'default'
+    PRIMARY = 'primary'
+    SECONDARY = 'secondary'
+    NEGATIVE = 'negative'
+    POSITIVE = 'positive'
 
 @dataclass(slots=True, frozen=True)
 class Coordinates:
@@ -98,7 +105,127 @@ class MessageActionObject:
             email=json_dict.get('email', None),
             photo=VkEventActionObjectPhoto(json_dict.get('photo')) if json_dict.get('photo', None) else None
         )
+    
+@dataclass(slots=True, frozen=True)
+class TextButtonObject:
+    label: str
+    payload: str
+    type: str = field(default='text')
 
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['label'], Literal['payload']], Any]) -> 'TextButtonObject':
+        return TextButtonObject(
+            label=json_dict.get('label', ''),
+            payload=json_dict.get('payload', '')
+        )
+    
+@dataclass(slots=True, frozen=True)
+class LinkButtonObject:
+    link: str
+    label: str
+    payload: str
+    type: str = field(default='open_link')
+
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['link'], Literal['label'], Literal['payload']], Any]) -> 'LinkButtonObject':
+        return LinkButtonObject(
+            link=json_dict.get('link', ''),
+            label=json_dict.get('label', ''),
+            payload=json_dict.get('payload', '')
+        )
+@dataclass(slots=True, frozen=True)
+class LocationButtonObject:
+    payload: str
+    type: str = field(default='location')
+
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['payload']], Any]) -> 'LocationButtonObject':
+        return LocationButtonObject(
+            payload=json_dict.get('payload', '')
+        )
+    
+@dataclass(slots=True, frozen=True)
+class VkpayButtonObject:
+    payload: str
+    hash: str
+    type: str = field(default='vkpay')
+
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['payload'], Literal['hash']], Any]) -> 'VkpayButtonObject':
+        return VkpayButtonObject(
+            payload=json_dict.get('payload', ''),
+            hash=json_dict.get('hash', '')
+        )
+    
+@dataclass(slots=True, frozen=True)
+class AppButtonObject:
+    app_id: int
+    owner_id: int
+    payload: str
+    label: str
+    hash: str
+    type: str = field(default='open_app')
+    
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['app_id'], Literal['owner_id'], Literal['payload'], Literal['label'], Literal['hash']], Any]) -> 'AppButtonObject':
+        return AppButtonObject(
+            app_id=json_dict.get('app_id', 0),
+            owner_id=json_dict.get('owner_id', 0),
+            payload=json_dict.get('payload', ''),
+            label=json_dict.get('label', ''),
+            hash=json_dict.get('hash', '')
+        )
+@dataclass(slots=True, frozen=True)
+class CallbackButtonObject:
+    label: str
+    payload: str
+    type: str = field(default='callback')
+
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['label'], Literal['payload']], Any]) -> 'CallbackButtonObject':
+        return CallbackButtonObject(
+            label=json_dict.get('label', ''),
+            payload=json_dict.get('payload', '')
+        )
+
+@dataclass(slots=True, frozen=True)
+class KeyboardButtonObject:
+    action: Union[TextButtonObject, LinkButtonObject, LocationButtonObject, VkpayButtonObject, AppButtonObject, CallbackButtonObject]
+    color: VkKeyboardButtonColor
+
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal['action'], Literal['color'], str], Any]) -> 'KeyboardButtonObject':
+
+        DICT_ACTION_OBJECT = {
+            'text': TextButtonObject,
+            'open_link': LinkButtonObject,
+            'location': LocationButtonObject,
+            'vkpay': VkpayButtonObject,
+            'open_app': AppButtonObject,
+            'callback': CallbackButtonObject
+        }
+        if DICT_ACTION_OBJECT.get(json_dict['action']['type'], None) is None:
+            raise TypeError(f"Не найден объект кнопки VK, с типом {json_dict['action']['type']}, возможно вы установили слишком высокую версию LongPoll API.")
+        
+        return KeyboardButtonObject(
+            action=DICT_ACTION_OBJECT[json_dict['action']['type']].from_json(json_dict['action']),
+            color=VkKeyboardButtonColor(json_dict.get('color'))
+        )
+@dataclass(slots=True, frozen=True)
+class KeyboardObject:
+    one_time: bool
+    buttons: List[List[KeyboardButtonObject]]
+    author_id: Union[int, None]
+    inline: bool
+
+    @staticmethod
+    def from_json(json_dict: Dict[Union[Literal["one_time"], Literal["inline"], Literal["buttons"], str], Any]) -> 'KeyboardObject':
+        return KeyboardObject(
+            one_time=json_dict['one_time'],
+            buttons=[[KeyboardButtonObject.from_json(button) for button in row_of_buttons] for row_of_buttons in json_dict['buttons']],
+            author_id=json_dict.get('author_id', None),
+            inline=json_dict['inline']
+        )
 @dataclass(slots=True, frozen=True)
 class MessageObject:
     """
@@ -123,7 +250,7 @@ class MessageObject:
     is_unavailable: bool
     geo: Union[GeoObject, None]
     payload: Union[str, None]
-    keyboard: Union[str, None] # не описан объект клавиатуры
+    keyboard: Union[KeyboardObject, None]
     fwd_messages: List[Dict[str, Any]]
     reply_message: Union[List[Dict[str, Any]], None] # не описан объект сообщения
     action: Union[MessageActionObject, None]
@@ -154,7 +281,7 @@ class MessageObject:
         important = json_dict.get('important', None)
         geo = GeoObject.from_json(json_dict.get('geo', {})) if json_dict.get('geo', None) else None
         payload = json_dict.get('payload', None)
-        keyboard = json_dict.get('keyboard', None)
+        keyboard = KeyboardObject.from_json(json_dict.get('keyboard', {})) if json_dict.get('keyboard', None) else None
         fwd_messages = json_dict.get('fwd_messages', [])
         is_hidden = json_dict.get('is_hidden', None)
         is_unavailable = json_dict.get('is_unavailable', None)

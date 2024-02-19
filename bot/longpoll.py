@@ -14,7 +14,7 @@ class VkBotEvent:
     raw_event: List[Dict[str, Any]]
     event_type: Union[VkBotEventType, str]
     event_context: VkBotEventContext
-    event_object: Dict[str, Any]
+    event_object: Union[NewMessageEvent]
     event_id: str
     v: str
 
@@ -111,7 +111,7 @@ class VkBotParseEvent:
         _event_context = self._parse_event_context()
 
         if DICT_OF_EVENT_OBJECTS.get(self.raw['type'], None) is not None:
-            _event_object = DICT_OF_EVENT_OBJECTS.get(self.raw['type'])
+            _event_object = DICT_OF_EVENT_OBJECTS[self.raw['type']]
         else:
             raise KeyError(f"Возникла ошибка поиска объекта события с типом {self.raw['type']}, по всей видимости объект события не был описан.")
 
